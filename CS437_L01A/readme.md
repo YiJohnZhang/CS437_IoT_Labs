@@ -1,1 +1,6 @@
-
+- [x] fin group setup
+- [ ] Finish PCB Deliverable (**Part 2**): 20240903
+- [ ] Finish Building rPi Car
+- [ ] Finish Setting up rPi
+- [ ] Finish code base for Lab 1A
+- [ ] Finish Video Deliverable
