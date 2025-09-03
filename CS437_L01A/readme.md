@@ -20,6 +20,7 @@ Collaborators: Minqiang Liu (ml110), Yi Zhang (yjzhang2)
 |07|Finish Lab 1A Writeup|||
 
 # notes
+- fixed author settings test
 - pcb todo:
 	- [ ] fix female header pin bottom mount polarity
 	- [ ] expand shield to accomodate battery; motor out
