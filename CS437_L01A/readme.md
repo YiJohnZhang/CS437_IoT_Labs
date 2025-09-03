@@ -1,4 +1,4 @@
-Collaborators: Minqiang Liu (ml110), Yi Zhang (yjzhang2)
+Collaborators: Minqiang Liu (mliu110), Yi Zhang (yjzhang2)
 
 # Deliverables and Locations
 |Deliverable ##|Deliverable|Directory / File / Link|
