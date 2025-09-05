@@ -1,4 +1,9 @@
-Collaborators: Minqiang Liu (mliu110), Yi Zhang (yjzhang2)
+CS437 Fall 2025 Lab 
+
+|Name|Email|
+|-|-|
+|Minqiang Liu|mliu110@illinois.edu|
+|Yi Zhang|yjzhang2@illinois.edu|
 
 # Deliverables and Locations
 |Deliverable ##|Deliverable|Directory / File / Link|
