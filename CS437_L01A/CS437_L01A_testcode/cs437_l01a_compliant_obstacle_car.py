@@ -8,24 +8,24 @@ CS437 Lab 01A Compliant Obstacle Car
 - [x] Car Can "See" (Scans)
 - [x] Car Can Navigate (attempts avoiding obstalces)
 
+todo:
+- a library that provides another abstraction layer so that I can call drive(turn_right, speed, ...);
 
 U night => video recording navigating video
 W, meeting => have completed the edited and voiceover video; ready for submission; also talk about the AI thing
 - Advanced Mapping
 - Object Deteciton
 '''
-
 import time;
 from typing import List;
 from ultrasonic import Ultrasonic;
 from motor import Ordinary_Car;
 from servo import Servo;
 
-
 Z_SERVO = '0';			# XY RHR (Freenove Docs)
 X_SERVO = '1';			# YZ RHR (Freenove Docs)
-NO_SSH_TIMEOUT = 5;		# I couldn't setup headless connection
-LIMIT_CAR_RUN = 10;		# I couldn't setup headless connection
+NO_SSH_TIMEOUT = 0;		# I couldn't setup headless connection
+LIMIT_CAR_RUN = 30;		# I couldn't setup headless connection
 MANUEVER_DISTANCE_THRESHOLD = 50;
 
 class Obstacle_Car:
@@ -129,13 +129,13 @@ class Obstacle_Car:
 			
 			self.next_scan_direction = 1;
 
-		# print(f'Obstacle_Car::scan_environment(): {postion_measurement}');
+		print(f'Obstacle_Car::scan_environment()::132: {postion_measurement}');
 		return postion_measurement;
 
 	def drive_car(self, distance) -> None:
 		'''
 		Drive the car, appropriately manuever given distance measurement.
-		Values here are sourced from Freenove (Manufacturer) Test Code Documentation.
+		Values were initially sourced from Freenove (Manufacturer) Test Code Documentation.
 		Source: https://docs.freenove.com/projects/fnk0043/en/latest/fnk0043/codes/tutorial/5_Ultrasonic_Car.html
 
 		Args:
@@ -143,36 +143,39 @@ class Obstacle_Car:
 		'''
 		
 		if (distance[0] < 30 and distance[1] < 30 and distance[2] <30) or distance[1] < 30:
-			self.CAR_MOTOR_MODULE.set_motor_model(-1450,-1450,-1450,-1450) 			
-			time.sleep(0.1);
+			self.CAR_MOTOR_MODULE.set_motor_model(-300,-300,-300,-300)
+			
 			if (distance[0] < 10 and distance[1] < 10 and distance[2] <10):
 				# stop
 				self.CAR_MOTOR_MODULE.set_motor_model(0, 0, 0, 0);
 				# blinkers
 				
 			elif distance[0] < distance[2]:
-				self.CAR_MOTOR_MODULE.set_motor_model(1450,1450,-1450,-1450);
+				self.CAR_MOTOR_MODULE.set_motor_model(300,300,-300,-300);
 			else:
-				self.CAR_MOTOR_MODULE.set_motor_model(-1450,-1450,1450,1450);
+				self.CAR_MOTOR_MODULE.set_motor_model(-300,-300,300,300);
 		elif distance[0] < 30 and distance[1] < 30:
-			self.CAR_MOTOR_MODULE.set_motor_model(1500,1500,-1500,-1500);
+			self.CAR_MOTOR_MODULE.set_motor_model(300,300,-300,-300);
 		elif distance[2] < 30 and distance[1] < 30:
-			self.CAR_MOTOR_MODULE.set_motor_model(-1500,-1500,1500,1500);
+			self.CAR_MOTOR_MODULE.set_motor_model(-300,-300,300,300);
 		elif distance[0] < 20:
-			self.CAR_MOTOR_MODULE.set_motor_model(2000,2000,-500,-500);
+			self.CAR_MOTOR_MODULE.set_motor_model(200,200,-200,-200);
 			if distance[0] < 10:
-				self.CAR_MOTOR_MODULE.set_motor_model(1500,1500,-1000,-1000);
+				self.CAR_MOTOR_MODULE.set_motor_model(100,100,-100,-100);
 		elif distance[2] < 20:
-			self.CAR_MOTOR_MODULE.set_motor_model(-500,-500,2000,2000);
+			self.CAR_MOTOR_MODULE.set_motor_model(-200,-200,200,200);
 			if distance[2] < 10:
-				self.CAR_MOTOR_MODULE.set_motor_model(-1500,-1500,1500,1500);
+				self.CAR_MOTOR_MODULE.set_motor_model(-100,-100,100,100);
 		else:
 			# go forward
-			self.CAR_MOTOR_MODULE.set_motor_model(600, 600, 600, 600);
+			self.CAR_MOTOR_MODULE.set_motor_model(300, 300, 300, 300);
 		
 		return;
 
 	def scan_and_drive(self) -> bool:
+		'''
+		Drive.
+		'''
 		continue_running = True;
 		if self.drive_time >= 0 and (time.time() >= self.end_time):
 			continue_running = False;
@@ -183,8 +186,11 @@ class Obstacle_Car:
 
 		return continue_running;
 
-def run_test_obstacle_car() -> None:
-	cs437_lab01a_compliant_car = Obstacle_Car(LIMIT_CAR_RUN);
+def run_test_obstacle_car(run_time) -> None:
+	'''
+	Helper function to run a car test.
+	'''
+	cs437_lab01a_compliant_car = Obstacle_Car(run_time);
 	is_running = True;
 
 	try:
@@ -200,4 +206,4 @@ if __name__ == '__main__':
 	'''
 	main()
 	'''
-	run_test_obstacle_car();
+	run_test_obstacle_car(LIMIT_CAR_RUN);

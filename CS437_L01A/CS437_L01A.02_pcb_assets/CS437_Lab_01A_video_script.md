@@ -1,0 +1,24 @@
+# video script
+- clips
+	- ref_clip: main driving clip
+	- clip_2: car on cinderblock clip while "driving" on air (only needed for `scan_environment`)
+
+- scene 1:
+	- ref_clip: 1 single clip of car driving stragiht, once it encounters a few obstacles it side tracks
+- scene 2:
+	- clip side-by-side with used code base to make decision
+		- (ref_clip): talk about how the car can move by itself (going straight down the road)
+			- this is handled by `drive_car`
+			- talk about code base. the settings, threshold distances for decisions and suggested motor PWM duty cycles is sourced from the Freenove Test Code Documentation in the following link (also reproduced in desc., https://docs.freenove.com/projects/fnk0043/en/latest/fnk0043/codes/tutorial/5_Ultrasonic_Car.html)
+		- (primary = clip_2)talk about how the car sees (`init` for the setup; then `scan_environment()` and dependencies)
+			- (primary = camera recording screen) in summary, `scan_environment()` is responsible for providing a **naive mapping** of the obstacles ahead; this naive mapping is a list of 3 integers that represents the distance. This vector is shown in the console.
+			- (screen recording #1) in the class initialization routine, `init`, the ultrasonic sensor is positioned for initial state assumed by algorithm used by `scan_environment()`
+			- (screen recording #2) scan_environment then takes snapshots of the car's left, middle, and right side to form the map. the position 
+		- **talk about how the car nagivates (`scan_and_drive` and dependencies)**
+			- (screen recording #3; FULL SCREEN) the car navigation is handled by `scan_and_drive` and its dependencies.
+				- the `continue_running` is a flag for its caller `run_test_obstacle_car()` to continue calling `scan_and_drive`
+				- the conditional expresession you see is just a self-timeout that allows the car to gracefully stop running after a programmable period of time 
+				- and the main methods `scan_environment` and `drive_car` are seen here. note that `scan_environment` is responsible for "seeing" and `drive_car` is responsible for taking in the naive map from `scan_environment` to decide how to actuate the car.
+		- the remainder of the code base that allows the vehicle to fulfill the specifications of this lab section is just related to gracefully setting up and exiting. these are: `setup`, `reset_motor_positions`, and `teardown`
+- **FINAL NOTE**: I apologize to any python devs who got a stroke seeing all these semicolons; i am used to developing in C++.
+	- then talk about the other features of the class (if time)
