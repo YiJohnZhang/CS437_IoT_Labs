@@ -39,9 +39,9 @@ VALID_MIN_CM = 2.0               # Discard physically implausible low readings
 VALID_MAX_CM = 400.0             # Discard too-far spikes
 USE_MIN_FOR_SAFETY = True        # Conservative: consider min of window when deciding stops
 
-ANGLE_MIN = 35                  # left bound of the small sweep
-ANGLE_MAX = 55                  # right bound of the small sweep
-SWEEP_STEP = 5                  # degrees per step
+ANGLE_MIN = 25                  # left bound of the small sweep
+ANGLE_MAX = 65                  # right bound of the small sweep
+SWEEP_STEP = 9                  # degrees per step
 SWEEP_DWELL_SEC = 0.20          # how long to dwell at each step (keeps sweep slow)
 POSE_SETTLE_SEC = 0.08          # settle a bit after each movement
 
@@ -211,3 +211,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
