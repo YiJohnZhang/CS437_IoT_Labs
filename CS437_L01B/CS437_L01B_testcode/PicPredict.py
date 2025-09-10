@@ -17,9 +17,10 @@ class TrafficClassifier:
         arr = image.img_to_array(img).astype(np.float32)
         arr = np.expand_dims(arr, axis=0)
 
-        probs = self.model.predict(arr)
+        probs = self.model.predict(arr, verbose=0)[0]
 
         idx = int(np.argmax(probs))
         label = self.class_names[idx]
 
-        return label
+        score = float(probs[idx])
+        return label, score
