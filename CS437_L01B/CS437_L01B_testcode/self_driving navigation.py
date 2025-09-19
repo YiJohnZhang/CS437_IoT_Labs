@@ -8,7 +8,7 @@
 #   and ONLY stops right before turns (continuous drive on straight runs).
 #
 # How to use:
-#   python static_grid_nav_cs437.py --goal 9 9
+#   python self_driving_navigation.py --goal 9 9
 #
 #   - Place the car on start cell (0,0) facing +Y.
 #   - Obstacles are defined in the grid[] array.
@@ -43,7 +43,7 @@ def stop(car: Ordinary_Car):
     car.set_motor_model(0, 0, 0, 0)
 
 def forward_time(car: Ordinary_Car, seconds: float):
-    car.set_motor_model(SAFE_SPEED + 300, SAFE_SPEED, SAFE_SPEED, SAFE_SPEED) # +300 to make my car kit run on a line 
+    car.set_motor_model(SAFE_SPEED + 300, SAFE_SPEED, SAFE_SPEED, SAFE_SPEED) # +300 to make my car(car issue) kit run on a line 
     time.sleep(max(0.0, seconds))
     stop(car)
 
@@ -53,12 +53,12 @@ def backward_time(car: Ordinary_Car, seconds: float):
     stop(car)
 
 def spin_left_time(car: Ordinary_Car, seconds: float):
-    car.set_motor_model(-TURN_SPEED - 300, -TURN_SPEED, TURN_SPEED, TURN_SPEED)
+    car.set_motor_model(-TURN_SPEED - 300, -TURN_SPEED, TURN_SPEED, TURN_SPEED) # -300 to make my car(car issue) kit run on a line 
     time.sleep(max(0.0, seconds))
     stop(car)
 
 def spin_right_time(car: Ordinary_Car, seconds: float):
-    car.set_motor_model(TURN_SPEED, TURN_SPEED, -TURN_SPEED - 300, -TURN_SPEED)
+    car.set_motor_model(TURN_SPEED, TURN_SPEED, -TURN_SPEED - 300, -TURN_SPEED) # -300 to make my car(car issue) kit run on a line 
     time.sleep(max(0.0, seconds))
     stop(car)
 
