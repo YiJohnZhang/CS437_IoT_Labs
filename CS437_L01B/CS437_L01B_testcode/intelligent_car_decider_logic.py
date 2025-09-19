@@ -49,6 +49,7 @@ def servo_sweep_and_range_worker(ultrasonic: Ultrasonic, servo: Servo, vision_wi
 			sweep_direction = 1
 	print("[INFO] Servo sweep thread stopping...")
 
+"""
 def scan_surroundings():
 	'''
 	
@@ -87,3 +88,4 @@ def main():
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
+"""
