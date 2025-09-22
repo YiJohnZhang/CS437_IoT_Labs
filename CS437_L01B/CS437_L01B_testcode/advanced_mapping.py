@@ -15,14 +15,13 @@ import threading
 # from typing import List
 import numpy as np
 
-from ultrasonic import Ultrasonic;
-from motor import Ordinary_Car;
-from servo import Servo;
+from ultrasonic import Ultrasonic
+from servo import Servo
 
-ANGLE_MIN = 25			# left bound of the small sweep (recommended: -30 deg from key)
-ANGLE_MAX = 65			# right bound of the small sweep (recommended: +30 deg from key)
-SWEEP_STEP = 5			# degrees per step (recommended: >5 deg)
-KEY_ANGLE = int((ANGLE_MAX - ANGLE_MIN) / 2)
+ANGLE_MIN = 50			# left bound of the small sweep (recommended: -30 deg from key)
+ANGLE_MAX = 130			# right bound of the small sweep (recommended: +30 deg from key)
+SWEEP_STEP = 10			# degrees per step (recommended: >5 deg)
+KEY_ANGLE = int((ANGLE_MAX + ANGLE_MIN) / 2)
 OFFSET_ANGLE = ANGLE_MAX - KEY_ANGLE
 
 VALID_MIN_CM = 2.0			# Discard physically implausible low readings
@@ -32,8 +31,9 @@ DETECTION_THRESHOLD = 100	# Discard obstalces detected at any distance further
 SWEEP_DWELL_TIMEOUT_SECONDS = 0.20		# how long to dwell at each step (keeps sweep slow)
 POSE_SETTLE_TIMEOUT_SECONDS = 0.08		# settle a bit after each movement
 
-GRID_INCREMENT = 10			# grid increment
-FEATHER_RADIUS = 1			# grid painting feather (to enlarge obstacles)
+GRID_INCREMENT = 5			# grid increment
+FEATHER_RADIUS = 0			# grid painting feather (to enlarge obstacles)
+
 
 def generate_zeroes_grid(grid_shape: tuple):
 	'''
@@ -75,16 +75,22 @@ def return_grid_position(polar_coordinates:int, grid_x_max:int, grid_increment:i
 	'''
 	obstacle_distance, obstacle_offset_angle = polar_coordinates
 	grid_x_center = int(grid_x_max / 2)
+	obstacle_offset_angle_radians = math.radians(obstacle_offset_angle)
+	# obstacle_effective_distance = obstacle_distance / grid_increment;
+	obstacle_effective_distance = 1 if obstacle_distance <= 10 else obstacle_distance / grid_increment;
+		# force it to be painted at a distance
+	# print(f'return_grid_position()::80: (r, effective_distance): {obstacle_distance, obstacle_effective_distance}')
+	# print(f'return_grid_position()::81: (r, eff_x, eff_y): {obstacle_distance, obstacle_effective_distance * math.sin(obstacle_offset_angle_radians), obstacle_effective_distance * math.cos(obstacle_offset_angle_radians)}')
 
-	calculated_grid_x_position = grid_x_center + floor_int(obstacle_distance * math.sin(math.radians(obstacle_offset_angle)) / grid_increment)
-	calculated_grid_y_position = floor_int(obstacle_distance * math.cos(math.radians(obstacle_offset_angle)) / grid_increment)
-	
+	calculated_grid_x_position = grid_x_center + floor_int(obstacle_effective_distance * math.sin(obstacle_offset_angle_radians))
+	calculated_grid_y_position = floor_int(obstacle_effective_distance * math.cos(obstacle_offset_angle_radians)) - 1
+
 	return (calculated_grid_x_position, calculated_grid_y_position)
 
 def collect_obstacle_readings(ultrasonic_obj:Ultrasonic, servomotor_obj:Servo, grid_shape:tuple) -> list:
 	obstacle_readings = []
 		# list of tuples in polar coordinate (r, theta)
-
+	
 	for current_angle in range(ANGLE_MIN, ANGLE_MAX, SWEEP_STEP):
 		servomotor_obj.set_servo_pwm('0', int(current_angle))
 			# Freenove move servo API method
@@ -92,12 +98,15 @@ def collect_obstacle_readings(ultrasonic_obj:Ultrasonic, servomotor_obj:Servo, g
 		offset_angle = current_angle - KEY_ANGLE
 		measured_distance = ultrasonic_obj.get_distance()
 			# Freenove ultrasonic sensor API method
+		# print(f'collect_obstacle_readings()::95: (r,theta)={(measured_distance, offset_angle)}')
 
 		if (measured_distance > VALID_MIN_CM) and (measured_distance <= DETECTION_THRESHOLD):
 			grid_position = return_grid_position((measured_distance, offset_angle), grid_shape[0], GRID_INCREMENT)
 			obstacle_readings.append(grid_position)
 			
-		time.sleep(SWEEP_DWELL_TIMEOUT_SECONDS)
+		time.sleep(SWEEP_DWELL_TIMEOUT_SECONDS * 2)
+	# print(f'collect_obstacle_readings()::102: converted obstacle readings: {obstacle_readings}')
+	
 	return obstacle_readings
 
 def paint_ones(obstacle_readings, grid_shape:tuple, feather_radius:int = FEATHER_RADIUS):
@@ -105,19 +114,19 @@ def paint_ones(obstacle_readings, grid_shape:tuple, feather_radius:int = FEATHER
 	
 	'''
 	vision_window = generate_zeroes_grid(grid_shape)
-	print(f'[INFO] initial view: {vision_window}')
+	# print(f'paint_ones()::111: initial view: {vision_window}')
 	painting_bounds = (0, grid_shape[0] - 1, 0, grid_shape[1] - 1)
 	
 	# calculate extra 1s to paint
 	feathered_painting_list = []
 	for obstacle_reading in obstacle_readings:
 		center_x, center_y = obstacle_reading
-		extra_x_coordinates = [x_coordinate for x_coordinate in range(center_x - feather_radius, center_x + feather_radius) if ((x_coordinate >= painting_bounds[2]) and (x_coordinate <= painting_bounds[3]) and (x_coordinate != center_x))]
-		extra_y_coordinates = [y_coordinate for y_coordinate in range(center_y - feather_radius, center_y + feather_radius) if ((y_coordinate >= painting_bounds[0]) and (y_coordinate <= painting_bounds[1]) and (y_coordinate != center_y))]
+		extra_x_coordinates = [x_coordinate for x_coordinate in range(center_x - feather_radius, center_x + feather_radius) if ((x_coordinate >= painting_bounds[2]) and (x_coordinate <= painting_bounds[3] - 1 - FEATHER_RADIUS) and (x_coordinate != center_x))]
+		extra_y_coordinates = [y_coordinate for y_coordinate in range(center_y - feather_radius, center_y + feather_radius) if ((y_coordinate >= painting_bounds[0]) and (y_coordinate <= painting_bounds[1] - 1 - FEATHER_RADIUS) and (y_coordinate != center_y))]
 
 		for x_coordinate in extra_x_coordinates:
 			for y_coordinate in extra_y_coordinates:
-				feathered_painting_list.append(x_coordinate, y_coordinate)
+				feathered_painting_list.append((x_coordinate, y_coordinate))
 	
 	# paint the reading 1s first
 	for (coordinate_x, coordinate_y) in obstacle_readings:
@@ -129,7 +138,9 @@ def paint_ones(obstacle_readings, grid_shape:tuple, feather_radius:int = FEATHER
 	
 	return vision_window
 
-def teardown(ultrasonic_obj):
+def teardown(servomotor_obj, ultrasonic_obj):
+	print('teardown()::136')
+	servomotor_obj.set_servo_pwm('0', 90)
 	ultrasonic_obj.close();
 
 def main():
@@ -141,18 +152,21 @@ def main():
 	matrix_rows = int(DETECTION_THRESHOLD / GRID_INCREMENT)
 	matrix_cols = int(DETECTION_THRESHOLD * math.sin(offset_angle_radians) / GRID_INCREMENT)
 	grid_shape = (matrix_rows, matrix_cols)
+	print(f'Grid Shape: {grid_shape}')
 
 	try:
 		while True:
 			collected_obstacle_readings = collect_obstacle_readings(ultrasonic_obj, servo_obj, grid_shape)
-			vision_window = paint_ones(collected_obstacle_readings, grid_shape, DETECTION_THRESHOLD, FEATHER_RADIUS)
+			
+			time.sleep(SWEEP_DWELL_TIMEOUT_SECONDS * 2)
+			vision_window = paint_ones(collected_obstacle_readings, grid_shape, 
+				FEATHER_RADIUS)
+			print(f'\nmain()::168: vision_window (feather_radius={FEATHER_RADIUS}):')
 			print(vision_window)
 	except KeyboardInterrupt:
 		pass
-	except Exception:
-		pass
 	finally:
-		teardown()
+		teardown(servo_obj, ultrasonic_obj)
 
 if __name__ == "__main__":
     main()
