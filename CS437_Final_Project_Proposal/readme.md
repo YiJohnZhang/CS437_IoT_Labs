@@ -25,6 +25,8 @@ Document: https://docs.google.com/document/d/1i7lR3Kv-JHNK85mYo5tavUMEgV3DUsJy30
 campuswire: page 4: final project rubic paper items add to 90, not 100
 - Rubric:
 
+|Item|Points|
+|-|-|
 |**Paper**|100|
 |Motivation|*20*|
 |Technical approach|*25*|
