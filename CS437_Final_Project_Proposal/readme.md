@@ -10,6 +10,7 @@ Document: https://docs.google.com/document/d/1i7lR3Kv-JHNK85mYo5tavUMEgV3DUsJy30
 	- **Group**: if you’re working in a group, list the other people in their group (name and also netid).
 	- **Contribution**: briefly describe the contribution that each group member will make to the project
 - **Rubric** (100 points total)
+
 |Section|Quality|Points|
 |-|-|-|
 |Motivation|Clear and convincing|20|
@@ -23,6 +24,7 @@ Document: https://docs.google.com/document/d/1i7lR3Kv-JHNK85mYo5tavUMEgV3DUsJy30
 # Final Project Submission Overview
 campuswire: page 4: final project rubic paper items add to 90, not 100
 - Rubric:
+
 |**Paper**|100|
 |Motivation|*20*|
 |Technical approach|*25*|
