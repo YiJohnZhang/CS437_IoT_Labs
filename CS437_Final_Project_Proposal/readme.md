@@ -19,6 +19,7 @@ Document: https://docs.google.com/document/d/1i7lR3Kv-JHNK85mYo5tavUMEgV3DUsJy30
 |Milestones|clearly described and realistic|40|
 |Novel/Creative*|Topic/idea is novel/creative -- problem not solved by existing products, hasn't been done in prior instances of class|**30 extra credit points**|
 |||100|
+
 **\*Note**: Proposal is 10% of final grade. This is a whole 3 points added to your grade (**A+ = 100%+ in this class**)
 
 # Final Project Submission Overview
