@@ -5,6 +5,7 @@
     <style>
       .container{
                   display: flex;
+                  overflow: hidden;
                 }
     </style>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -19,11 +20,11 @@
       <div class="jumbotron">
       <h2>CS498: IoT -- Lab 2</h2>
 
-      <!-- <video class="center" width="600" height="400" controls>
-        <source src="samplevid.mp4" type="video/mp4">
+      <video class="center" width="600" height="400" controls>
+        <source src="SERVER_ADDR:PORT/ROUTE" type="video/mp4">
           Your browser does not support the video tag.
-      </video> -->
-      <img src="./media/default_background.png" id='pics'>
+      </video>
+      <!-- <img src="./media/default_background.png" id='pics'> -->
     </div> 
   
   </div>
@@ -31,7 +32,9 @@
   <div class="row">
     <div class="container">
         <div class="jumbotron text-center col-md-6">
-            <span>&nbsp;&nbsp;</span> 
+            <span>&nbsp;</span>
+            <span>Use 'W', 'A', 'S', 'D' to control the car direction.</span>
+            <br>
             <span id="upArrow" style='font-size:50px; color:grey;'>&#8679;</span>
             <br>
             <span id="leftArrow" style='font-size:45px; color:grey;'>&#8678;</span>
@@ -44,7 +47,7 @@
 
         <div class="jumbotron text-left col-md-6">
         <input id="message" type="text" placeholder="message to Pi"/>
-        <button class="btn btn-success" onclick="update_data()">Sumbit</button>
+        <button class="btn btn-success" onclick="update_data()">Submit</button>
           <p>
             <span id="direction_dot" style="color:Green">&bull;</span> Car Direction: <span id="direction"> </span>
            <br>

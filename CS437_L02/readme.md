@@ -1,3 +1,7 @@
+# notes dump
+another strategy: setup a py flask server on rpi, extract imgs and data over the route: https://www.youtube.com/watch?v=qs3KhLDUBmk
+
+# `readme.md` from mceasar
 Explaination of Electron application files:
 
 - `package.json` - Points to the app's main file and lists its details and dependencies.

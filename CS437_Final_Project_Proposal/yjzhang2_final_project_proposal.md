@@ -26,6 +26,15 @@
 	- 
 
 # Notes & Dump
+- Challenge: 1-layer Board (SMT ONLY, no wave soldering)
+	- C2685092 (reverse mount); reverse mounts lots of SMT components then just label it
+- Challenge Update: 1-layer SMT + wave soldering reverse side ()
+	- because if 2-layer => wave soldering + selective wave soldering (less manufacturers have capabilities)
+- Need to guess 
+- can't just fork PyCar's open-source library and call it a day: PyCar-X uses a microcontroller on top of the rpi for the pihat to control the car.
+- need to deliver parts to Minqiang's house for simultaneous assembly?
+	- 
+
 - Note: Each person in a group is expected to spend [50, 100] hours on this project
 	- 1 person: 50 - 100 hours
 	- 2 people: 100 - 200 hours
