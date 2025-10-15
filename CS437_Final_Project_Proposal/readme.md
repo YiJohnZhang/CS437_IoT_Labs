@@ -1,6 +1,8 @@
 
 # Links
 Document: https://docs.google.com/document/d/1i7lR3Kv-JHNK85mYo5tavUMEgV3DUsJy30N4xCAR85Y/edit?tab=t.0
+Final Written Report Outline Sheet: https://docs.google.com/document/d/1ZBZxLMVDUfmsLCQdVccmIzQbDZrKZ47Bz5UWd5cWF84/edit?tab=t.0
+
 
 # Final Project Proposal Overview
 - **Proposal Specs**: 500 - 750 words
