@@ -27,7 +27,9 @@ from car import Car
 from threading import Thread
 from camera import Camera			# extremely low-frame rate video == image l0l
 	# use either `get_frame` OR `save_image`?
-from gpiozero import CPUTemperature	# for getting the rpi cpu temperature
+from gpiozero import CPUTemperature, LoadAverage
+	# for getting the rpi cpu temperature
+	# https://gpiozero.readthedocs.io/en/stable/api_internal.html
 
 class CarTCPServer:
 	def __init__(self):
@@ -57,13 +59,24 @@ class CarTCPServer:
 			self.send_sonic_data_time = time.time()
 			if self.tcp_server.get_command_server_busy() == False:
 				distance = self.car.sonic.get_distance()
-				cmd = self.command.CMD_MODE + "#3#{:.2f}".format(distance) + "\n"
+				cmd = self.command.CMD_MODE + "D#3#{:.2f}".format(distance) + "\n"
 				self.tcp_server.send_data_to_command_client(cmd)
 				#print(cmd)
 
-	def send_temperature_data(self):
-		cpu_obj = CPUTemperature()
-		return cpu_obj.temperature
+	def send_cpu_temperature_data(self):
+		# todo, refactor `send_sonic_data()`, this, `send_cpu_load_data()` into a general method
+		cpu_temperature_obj = CPUTemperature()
+		temperature = cpu_temperature_obj.temperature
+		if not self.tcp_server.get_command_server_busy():
+			message = f'{self.command.CMD_MODE}T#{temperature}\n'
+			self.tcp_server.send_data_to_command_client(message)
+	
+	def send_cpu_load_data(self):
+		cpu_load_obj = LoadAverage(min_load_average = 0, max_load_average = 2)
+		cpu_max_load = cpu_load_obj.max_load_average
+		if not self.tcp_server.get_command_server_busy():
+			message = f'{self.command.CMD_MODE}C#{cpu_max_load}\n'
+			self.tcp_server.send_data_to_command_client(message)
 
 	def send_power_data(self):
 		if self.tcp_server.get_command_server_busy() == False:
@@ -132,7 +145,10 @@ class CarTCPServer:
 					self.send_sonic_data()  # Send ultrasonic distance data
 
 				elif cmd == self.command.CMD_CPU_TEMPERATURE:
-					self.send_temperature_data()
+					self.send_cpu_temperature_data()
+
+				elif cmd == self.command.CMD_CPU_LOAD:
+					self.send_cpu_load_data()
 
 				elif cmd == self.command.CMD_POWER:
 					self.send_power_data()  # Send power level data to client

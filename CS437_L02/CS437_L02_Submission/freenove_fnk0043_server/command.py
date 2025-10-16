@@ -12,4 +12,5 @@ class Command:
         self.CMD_POWER      = "CMD_POWER" 
         self.CMD_MODE       = "CMD_MODE"
         self.CMD_LINE       = "CMD_LINE"
-        self.CMD_TEMPERATURE = "CMD_TEMPERATURE"    # self added this in 
+        self.CMD_TEMPERATURE = "CMD_TEMPERATURE"# added this in 
+        self.CMD_CPU_LOAD = "CMD_CPU_LOAD"      # added this in

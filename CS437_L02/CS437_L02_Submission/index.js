@@ -25,13 +25,14 @@ const CONNECTION_TYPE_ENUM = new Set([
 const CONNECTION_TYPE = "ip";
 
 const SENSOR_TIME_PERIOD = 1000;	// [ms]
-const SENSOR_TYPE_ENUM = new Set(["ultrasonic", "temperature"]);
+const SENSOR_TYPE_ENUM = new Set(["ultrasonic", "temperature", "cpu_load"]);
 let SONIC_UPDATE_TIMER_OBJ = null;
-let TEMPERATURE_UPDATE_TIMER_OBJ = null;
+let CPU_TEMPERATURE_UPDATE_TIMER_OBJ = null;
+let CPU_LOAD_UPDATE_TIMER_OBJ = null;
 //	==================== Global State
 let is_connected_flag = false;
 let client_socket = null;
-let elBluetooth, elDir, elSpeed, elObstacle, elTemperature;
+let elBluetooth, elDir, elSpeed, elObstacle, elTemperature, elCPULoad;
 
 //	-------------------- NETWORK LOGIC
 /**	bt_connect()
@@ -94,17 +95,24 @@ function socket_connect(target_ip_address, target_port) {
 		is_connected_flag = true;
 		elBluetooth.innerHTML = `Connected to ${target_ip_address}::${target_port}`;
 		SONIC_UPDATE_TIMER_OBJ = start_auto_update(SENSOR_TIME_PERIOD, "ultrasonic");
-		TEMPERATURE_UPDATE_TIMER_OBJ = start_auto_update(SENSOR_TIME_PERIOD, "temperature");
+		CPU_LOAD_UPDATE_TIMER_OBJ = start_auto_update(SENSOR_TIME_PERIOD, "cpu_load");
+		CPU_TEMPERATURE_UPDATE_TIMER_OBJ = start_auto_update(SENSOR_TIME_PERIOD, "temperature");
 	});
 
 	client_socket.on('data', (data) => {
 		const msg = data.toString().trim();
 		try {
-			if (msg.startsWith("CMD_MODE")) {
+			if (msg.startsWith("CMD_MODE_D")) {
 				const distance = parseFloat(msg.split("#")[2]);
 				if (!isNaN(distance)) {
 					elObstacle.textContent = distance.toFixed(2);
 				}
+			} else if (msg.startsWith("CMD_MODE_T")) {
+				const cpu_temperature = parseFloat(msg.split('#')[1]);
+				elTemperature.textContent = cpu_temperature.toFixed(2);
+			} else if (msg.startsWith("CMD_MODE_C")) {
+				const cpu_load = parseFloat(msg.split('#')[1]);
+				elCPULoad.textContent = cpu_load.toFixed(1);
 			}
 		} catch (err) {
 			console.warn("⚠️ Failed to parse message:", msg);
@@ -112,15 +120,15 @@ function socket_connect(target_ip_address, target_port) {
 	});
 
 	client_socket.on('error', (err) => {
-		is_connected_flag = false;
+		// is_connected_flag = false;
+		stop_TCP_client();
 		elBluetooth.textContent = "Connection failed: " + err.message;
-		SONIC_UPDATE_TIMER_OBJ = stop_auto_update_timer(SONIC_UPDATE_TIMER_OBJ);
 	});
 
 	client_socket.on('close', () => {
-		is_connected_flag = false;
+		// is_connected_flag = false;
+		stop_TCP_client();
 		elBluetooth.textContent = "Disconnected";
-		SONIC_UPDATE_TIMER_OBJ = stop_auto_update_timer(SONIC_UPDATE_TIMER_OBJ);
 	});
 }
 
@@ -139,6 +147,8 @@ function stop_TCP_client() {
 		}
 
 		SONIC_UPDATE_TIMER_OBJ = stop_auto_update_timer(SONIC_UPDATE_TIMER_OBJ);
+		CPU_LOAD_UPDATE_TIMER_OBJ = stop_auto_update_timer(CPU_LOAD_UPDATE_TIMER_OBJ);
+		CPU_TEMPERATURE_UPDATE_TIMER_OBJ = stop_auto_update_timer(CPU_TEMPERATURE_UPDATE_TIMER_OBJ);
 	} catch (e) {
 		console.error("Error closing TCP client:", e);
 	}
@@ -180,14 +190,15 @@ function update_data() {
  function start_auto_update(update_time_period_ms, sensor_reading_type) {
 	assert.ok(SENSOR_TYPE_ENUM.has(sensor_reading_type), `start_auto_update()::${sensor_feedback_type} not a valid auto-update feedback datapoint`);
 	
-	timer_interval_obj = sensor_reading_type === 'ultrasonic' ? SONIC_UPDATE_TIMER_OBJ : TEMPERATURE_UPDATE_TIMER_OBJ;
+	timer_interval_obj = sensor_reading_type === 'ultrasonic' ? SONIC_UPDATE_TIMER_OBJ : 
+		sensor_reading_type == 'temperature' ? CPU_TEMPERATURE_UPDATE_TIMER_OBJ : CPU_LOAD_UPDATE_TIMER_OBJ;
 
-	if (timer_interval_obj)
-		clearInterval(timer_interval_obj);
+	if (timer_interval_obj) clearInterval(timer_interval_obj);
 	
-		timer_interval_obj = setInterval(() => {
+	timer_interval_obj = setInterval(() => {
 		if (is_connected_flag) {
-			sensor_reading_type === 'ultrasonic' ? send_data("CMD_SONIC") : send_data("CMD_TEMPERATURE");				
+			sensor_reading_type === 'ultrasonic' ? send_data("CMD_SONIC") : 
+				sensor_reading_type == 'temperature' ? send_data("CMD_TEMPERATURE") : send_data("CMD_CPU_LOAD");			
 		}
 	}, update_time_period_ms);
 }
@@ -253,6 +264,8 @@ window.onload = () => {
 	elDir = document.getElementById("direction");
 	elSpeed = document.getElementById("speed");
 	elObstacle = document.getElementById("obstacle_distance");
+	elCPULoad = document.getElementById("cpu_load_info");
+	elTemperature = document.getElementById("cpu_temperature_info");
 	assert.ok(CONNECTION_TYPE_ENUM.has(CONNECTION_TYPE), `window.onload()::\"${CONNECTION_TYPE}\" is an invalid connection type`);
 
 	(CONNECTION_TYPE == "ip") ? socket_connect(SERVER_ADDRESS, SERVER_PORT) : bt_connect(BLUETOOTH_MAC_ADDRESS);
