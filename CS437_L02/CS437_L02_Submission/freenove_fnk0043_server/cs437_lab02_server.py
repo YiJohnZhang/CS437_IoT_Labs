@@ -68,14 +68,14 @@ class CarTCPServer:
 		cpu_temperature_obj = CPUTemperature()
 		temperature = cpu_temperature_obj.temperature
 		if not self.tcp_server.get_command_server_busy():
-			message = f'{self.command.CMD_MODE}T#{temperature}\n'
+			message = f'{self.command.CMD_TEMPERATURE}#{temperature}\n'
 			self.tcp_server.send_data_to_command_client(message)
 	
 	def send_cpu_load_data(self):
 		cpu_load_obj = LoadAverage(min_load_average = 0, max_load_average = 2)
 		cpu_max_load = cpu_load_obj.max_load_average
 		if not self.tcp_server.get_command_server_busy():
-			message = f'{self.command.CMD_MODE}C#{cpu_max_load}\n'
+			message = f'{self.command.CMD_CPU_LOAD}#{cpu_max_load}\n'
 			self.tcp_server.send_data_to_command_client(message)
 
 	def send_power_data(self):
@@ -166,27 +166,7 @@ class CarTCPServer:
 					BL = LY - LX - RX
 					BR = LY + LX + RX
 					self.car.motor.set_motor_model(FL, BL, FR, BR)
-
-				elif cmd == self.command.CMD_CAR_ROTATE:
-					# ints: [angle_deg, mag, rot_angle_deg, rot_mag]
-					d = [int(ints[i]) for i in range(4)]
-					if d[3] == 0:
-						# Stop rotate helper; fall back to a single vector step
-						self.rotation_active = False
-						LX = -int(d[1] * math.sin(math.radians(d[0])))
-						LY =  int(d[1] * math.cos(math.radians(d[0])))
-						RX =  int(d[3] * math.sin(math.radians(d[2])))
-						RY =  int(d[3] * math.cos(math.radians(d[2])))
-						FR = LY - LX + RX
-						FL = LY + LX - RX
-						BL = LY - LX - RX
-						BR = LY + LX + RX
-						self.car.motor.set_motor_model(FL, BL, FR, BR)
-					elif not self.rotation_active:
-						# Start rotate helper (non-blocking)
-						self.rotation_active = True
-						Thread(target=self.car.mode_rotate, args=(d[2],), daemon=True).start()
-
+			
 				elif cmd == self.command.CMD_MODE:
 					# Only honor "stop motors" (0). Ignore all other modes/features.
 					v = int(ints[0])

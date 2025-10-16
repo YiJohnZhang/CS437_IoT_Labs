@@ -7,16 +7,14 @@ const server_port = 5000;             // TCP port
 // -------------------- Global state --------------------
 let client_socket1 = null;
 let connect_Flag = false;
-let sonicInterval = null;
+let autoInterval = null;
+let servoInterval = null;
 
-let elBluetooth, elDir, elSpeed, elObstacle;
+let elBluetooth, elDir, elObstacle, elTemperature, elCpuLoad;
 
-// -------------------- Distance Tracking --------------------
-const FIXED_SPEED_CM_S = 20;
-let isMoving = false;
-let moveStartTime = null;
-let totalDistance = 0;
-let distanceTimer = null;
+// -------------------- Servo Sweep State --------------------
+let servoAngle = 45;
+let servoIncreasing = true;
 
 // -------------------- Connect to TCP Server --------------------
 function socket1_connect(ip) {
@@ -25,7 +23,8 @@ function socket1_connect(ip) {
     client_socket1.connect(server_port, ip, () => {
         connect_Flag = true;
         elBluetooth.innerHTML = "Connected to " + ip;
-        startSonicAutoUpdate();
+        startAutoUpdate();
+        startServoSweep();
     });
 
     client_socket1.on('data', (data) => {
@@ -33,9 +32,13 @@ function socket1_connect(ip) {
         try {
             if (msg.startsWith("CMD_MODE")) {
                 const distance = parseFloat(msg.split("#")[2]);
-                if (!isNaN(distance)) {
-                    elObstacle.textContent = distance.toFixed(2);
-                }
+                if (!isNaN(distance)) elObstacle.textContent = distance.toFixed(2);
+            } else if (msg.startsWith("CMD_TEMPERATURE")) {
+                const temperature = parseFloat(msg.split("#")[1]);
+                if (!isNaN(temperature)) elTemperature.textContent = temperature.toFixed(2);
+            } else if (msg.startsWith("CMD_CPU_LOAD")) {
+                const cpuLoad = parseFloat(msg.split("#")[1]);
+                if (!isNaN(cpuLoad)) elCpuLoad.textContent = cpuLoad.toFixed(2);
             }
         } catch (err) {
             console.warn("⚠️ Failed to parse message:", msg);
@@ -45,13 +48,15 @@ function socket1_connect(ip) {
     client_socket1.on('error', (err) => {
         connect_Flag = false;
         elBluetooth.textContent = "Connection failed: " + err.message;
-        stopSonicAutoUpdate();
+        stopAutoUpdate();
+        stopServoSweep();
     });
 
     client_socket1.on('close', () => {
         connect_Flag = false;
         elBluetooth.textContent = "Disconnected";
-        stopSonicAutoUpdate();
+        stopAutoUpdate();
+        stopServoSweep();
     });
 }
 
@@ -64,47 +69,48 @@ function sendData(cmd) {
     }
 }
 
-// -------------------- Auto obstacle request --------------------
-function startSonicAutoUpdate() {
-    if (sonicInterval) clearInterval(sonicInterval);
-    sonicInterval = setInterval(() => {
+// -------------------- Auto updates --------------------
+function startAutoUpdate() {
+    if (autoInterval) clearInterval(autoInterval);
+    autoInterval = setInterval(() => {
         if (connect_Flag) {
+            sendData("CMD_TEMPERATURE");
+            sendData("CMD_CPU_LOAD");
+        }
+    }, 2000);
+}
 
-            sendData("CMD_SONIC");
+function stopAutoUpdate() {
+    if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+    }
+}
+
+// -------------------- Servo sweeping --------------------
+function startServoSweep() {
+    if (servoInterval) clearInterval(servoInterval);
+    servoInterval = setInterval(() => {
+        if (!connect_Flag) return;
+
+        sendData(`CMD_SERVO#0#${servoAngle}`);
+        sendData("CMD_SONIC");
+
+        // Move servo angle up or down
+        if (servoIncreasing) {
+            servoAngle += 5;
+            if (servoAngle >= 65) servoIncreasing = false;
+        } else {
+            servoAngle -= 5;
+            if (servoAngle <= 45) servoIncreasing = true;
         }
     }, 1000);
 }
 
-function stopSonicAutoUpdate() {
-    if (sonicInterval) {
-        clearInterval(sonicInterval);
-        sonicInterval = null;
-    }
-}
-
-// -------------------- Distance Tracking --------------------
-function startMoving() {
-    if (!isMoving) {
-        isMoving = true;
-        moveStartTime = Date.now();
-        elSpeed.textContent = FIXED_SPEED_CM_S.toFixed(2);
-
-        distanceTimer = setInterval(() => {
-            const elapsedSec = (Date.now() - moveStartTime) / 1000;
-            const newDistance = FIXED_SPEED_CM_S * elapsedSec;
-        }, 500);
-    }
-}
-
-function stopMoving() {
-    if (isMoving) {
-        const elapsedSec = (Date.now() - moveStartTime) / 1000;
-        totalDistance += FIXED_SPEED_CM_S * elapsedSec;
-
-        if (distanceTimer) clearInterval(distanceTimer);
-        distanceTimer = null;
-        moveStartTime = null;
-        isMoving = false;
+function stopServoSweep() {
+    if (servoInterval) {
+        clearInterval(servoInterval);
+        servoInterval = null;
     }
 }
 
@@ -119,25 +125,21 @@ function updateKey(e) {
             document.getElementById("upArrow").style.color = "green";
             command = "CMD_M_MOTOR#0#800#0#0";
             elDir.textContent = "Forward";
-            startMoving();
             break;
         case 83: // S - Backward
             document.getElementById("downArrow").style.color = "green";
             command = "CMD_M_MOTOR#180#800#0#0";
             elDir.textContent = "Backward";
-            startMoving();
             break;
         case 65: // A - Left
             document.getElementById("leftArrow").style.color = "green";
             command = "CMD_M_MOTOR#0#0#90#800";
             elDir.textContent = "Left";
-            startMoving();
             break;
         case 68: // D - Right
             document.getElementById("rightArrow").style.color = "green";
             command = "CMD_M_MOTOR#0#0#-90#800";
             elDir.textContent = "Right";
-            startMoving();
             break;
     }
 
@@ -151,9 +153,6 @@ function resetKey() {
     });
 
     elDir.textContent = "Stopped";
-    elSpeed.textContent = "0.00";
-
-    stopMoving();
     sendData("CMD_M_MOTOR#0#0#0#0");
 }
 
@@ -172,7 +171,8 @@ function stopTcpClient() {
             connect_Flag = false;
             elBluetooth.textContent = "Connection closed";
         }
-        stopSonicAutoUpdate();
+        stopAutoUpdate();
+        stopServoSweep();
     } catch (e) {
         console.error("Error closing TCP client:", e);
     }
@@ -182,8 +182,9 @@ function stopTcpClient() {
 window.onload = () => {
     elBluetooth = document.getElementById("bluetooth");
     elDir = document.getElementById("direction");
-    elSpeed = document.getElementById("speed");
     elObstacle = document.getElementById("obstacle_distance");
+    elTemperature = document.getElementById("temperature");
+    elCpuLoad = document.getElementById("cpu_load");
 
     socket1_connect(server_addr);
     document.onkeydown = updateKey;
