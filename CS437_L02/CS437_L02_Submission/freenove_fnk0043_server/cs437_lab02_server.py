@@ -144,7 +144,7 @@ class CarTCPServer:
 				elif cmd == self.command.CMD_SONIC:
 					self.send_sonic_data()  # Send ultrasonic distance data
 
-				elif cmd == self.command.CMD_CPU_TEMPERATURE:
+				elif cmd == self.command.CMD_TEMPERATURE:
 					self.send_cpu_temperature_data()
 
 				elif cmd == self.command.CMD_CPU_LOAD:
