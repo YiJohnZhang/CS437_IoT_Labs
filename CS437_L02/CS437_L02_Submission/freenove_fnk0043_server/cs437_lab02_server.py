@@ -72,10 +72,10 @@ class CarTCPServer:
 			self.tcp_server.send_data_to_command_client(message)
 	
 	def send_cpu_load_data(self):
-		cpu_load_obj = LoadAverage(min_load_average = 0, max_load_average = 2)
-		cpu_max_load = cpu_load_obj.max_load_average
+		cpu_load_obj = LoadAverage(min_load_average = 0, max_load_average = 1)
+		cpu_load = cpu_load_obj.value
 		if not self.tcp_server.get_command_server_busy():
-			message = f'{self.command.CMD_CPU_LOAD}#{cpu_max_load}\n'
+			message = f'{self.command.CMD_CPU_LOAD}#{cpu_load}\n'
 			self.tcp_server.send_data_to_command_client(message)
 
 	def send_power_data(self):
