@@ -166,7 +166,19 @@ class CarTCPServer:
 					BL = LY - LX - RX
 					BR = LY + LX + RX
 					self.car.motor.set_motor_model(FL, BL, FR, BR)
-			
+                    
+				elif self.cmd_parse.command_string == self.command.CMD_SERVO:
+					try:
+						print(len(self.cmd_parse.int_parameter))
+						data1 = str(self.cmd_parse.int_parameter[0])
+						data2 = int(self.cmd_parse.int_parameter[1])
+						print(data1, data2)
+						if data1 == None or data2 == None:
+							continue
+						self.car.servo.set_servo_pwm(data1, data2)
+					except Exception as e:
+						print(e)
+
 				elif cmd == self.command.CMD_MODE:
 					# Only honor "stop motors" (0). Ignore all other modes/features.
 					v = int(ints[0])
