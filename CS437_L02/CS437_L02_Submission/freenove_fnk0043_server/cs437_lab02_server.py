@@ -53,7 +53,6 @@ class CarTCPServer:
 		self.rotation_active = False
 		self.send_sonic_data_time = time.time()
 
-
 	def send_sonic_data(self):
 		if time.time() - self.send_sonic_data_time > 0.5:
 			self.send_sonic_data_time = time.time()
