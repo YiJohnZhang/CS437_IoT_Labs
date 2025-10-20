@@ -166,11 +166,11 @@ class CarTCPServer:
 					BR = LY + LX + RX
 					self.car.motor.set_motor_model(FL, BL, FR, BR)
                     
-				elif self.cmd_parse.command_string == self.command.CMD_SERVO:
+				elif cmd == self.command.CMD_SERVO:
 					try:
-						print(len(self.cmd_parse.int_parameter))
-						data1 = str(self.cmd_parse.int_parameter[0])
-						data2 = int(self.cmd_parse.int_parameter[1])
+						# print(len(print(len(self.cmd_parse.int_parameter))))
+						data1 = str(ints[0])
+						data2 = int(ints[1])
 						print(data1, data2)
 						if data1 == None or data2 == None:
 							continue
