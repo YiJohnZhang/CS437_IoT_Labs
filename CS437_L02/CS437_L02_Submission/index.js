@@ -7,7 +7,7 @@
 
 const net = require('net');
 const assert = require('assert');
-const bt = require('bluetooth-serial-port');	// for bluetooth
+// const bt = require('bluetooth-serial-port');	// for bluetooth
 
 //	-------------------- GLOBAL STATE & CONFIG VARIABLES
 //	==================== Connection Configuration
