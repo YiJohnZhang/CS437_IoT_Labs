@@ -168,7 +168,7 @@ class CarTCPServer:
                     
 				elif cmd == self.command.CMD_SERVO:
 					try:
-						# print(len(print(len(self.cmd_parse.int_parameter))))
+						# print(len(self.cmd_parse.int_parameter))
 						data1 = str(ints[0])
 						data2 = int(ints[1])
 						print(data1, data2)
