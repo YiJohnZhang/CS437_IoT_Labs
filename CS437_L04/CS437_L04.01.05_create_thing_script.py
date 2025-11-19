@@ -48,11 +48,11 @@ def create_certificate_and_add_to_group(thing_id, thing_name, thing_arn):
 			elif element == 'certificateId':
 					certificateId = data['certificateId']
 							
-	with open(os.path.join('certificates', '') + thing_name + '-public.key', 'w') as outfile:
+	with open(os.path.join('certs', '') + thing_name + '-public.key', 'w') as outfile:
 			outfile.write(PublicKey)
-	with open(os.path.join('certificates', '') + thing_name + '-private.key', 'w') as outfile:
+	with open(os.path.join('certs', '') + thing_name + '-private.key', 'w') as outfile:
 			outfile.write(PrivateKey)
-	with open(os.path.join('certificates', '') + thing_name + '-cert.pem', 'w') as outfile:
+	with open(os.path.join('certs', '') + thing_name + '-cert.pem', 'w') as outfile:
 			outfile.write(certificatePem)
 
 	response = THING_CLIENT.attach_policy(
