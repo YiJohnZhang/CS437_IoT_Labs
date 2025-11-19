@@ -15,7 +15,7 @@ THING_ARN = ''
 THING_GROUP_NAME = ''
 THING_GROUP_ARN = ''
 
-thingClient = boto3.client('iot')
+THING_CLIENT = boto3.client('iot')
 
 BOTO3_ACCESS_KEY_ID = '';
 BOTO3_SECRET_ACCESS_KEY = '';
